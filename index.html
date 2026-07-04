@@ -1,144 +1,1780 @@
 <!DOCTYPE html>
 <html lang="de">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>rmi-net</title>
-    <!-- Zuverlässiges Tailwind CSS v3 Script für sofortiges Laden -->
-    <script src="https://cdn.tailwindcss.com"></script>
+<meta charset="UTF-8">
+<title>Fokus-Training</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap');
+
+:root{
+  --bg: #0F1E1B;
+  --surface: #16302B;
+  --surface-2: #1C3C35;
+  --accent: #E3B23C;
+  --accent-dim: #B98F30;
+  --calm: #6FBFB0;
+  --danger: #D97066;
+  --text: #F2F0E6;
+  --muted: #90A8A3;
+  --ring: rgba(227,178,60,0.45);
+}
+
+*{box-sizing:border-box;}
+html,body{margin:0;padding:0;}
+body{
+  background:var(--bg);
+  color:var(--text);
+  font-family:'IBM Plex Sans',sans-serif;
+  font-size:17px;
+  min-height:100%;
+  padding:32px 20px 48px;
+}
+
+.wrap{max-width:820px;margin:0 auto;}
+
+header{margin-bottom:28px;}
+.eyebrow{
+  font-size:12px;
+  letter-spacing:0.14em;
+  text-transform:uppercase;
+  color:var(--calm);
+  font-weight:600;
+  margin-bottom:8px;
+}
+h1{
+  font-family:'Fraunces',serif;
+  font-weight:600;
+  font-size:clamp(28px,4vw,40px);
+  margin:0 0 8px;
+  letter-spacing:-0.01em;
+}
+.sub{color:var(--muted);font-size:16.5px;max-width:560px;line-height:1.55;}
+
+.app-shell{
+  display:flex;
+  align-items:flex-start;
+  gap:24px;
+  margin-top:28px;
+}
+
+.tabs{
+  display:flex;
+  flex-direction:column;
+  gap:6px;
+  width:210px;
+  flex-shrink:0;
+  position:sticky;
+  top:20px;
+}
+.tab{
+  background:var(--surface);
+  border:1px solid rgba(255,255,255,0.06);
+  color:var(--muted);
+  padding:11px 16px;
+  border-radius:10px;
+  font-size:14.5px;
+  font-weight:500;
+  cursor:pointer;
+  transition:all .15s ease;
+  font-family:inherit;
+  text-align:left;
+  width:100%;
+}
+.tab:hover{color:var(--text);border-color:rgba(255,255,255,0.14);}
+.tab.active{
+  background:var(--accent);
+  color:#241a05;
+  border-color:var(--accent);
+  font-weight:600;
+}
+.tab:focus-visible{outline:2px solid var(--ring);outline-offset:2px;}
+
+.content-area{flex:1;min-width:0;}
+
+@media (max-width:760px){
+  .app-shell{flex-direction:column;gap:16px;}
+  .tabs{
+    flex-direction:row;
+    flex-wrap:wrap;
+    width:100%;
+    position:static;
+    border-bottom:1px solid rgba(255,255,255,0.08);
+    padding-bottom:16px;
+  }
+  .tab{width:auto;}
+}
+
+.panel{display:none;}
+.panel.active{display:block;animation:fade .25s ease;}
+@keyframes fade{from{opacity:0;transform:translateY(4px);}to{opacity:1;transform:translateY(0);}}
+
+.card{
+  background:var(--surface);
+  border:1px solid rgba(255,255,255,0.06);
+  border-radius:16px;
+  padding:26px;
+}
+.card h2{
+  font-family:'Fraunces',serif;
+  font-weight:600;
+  font-size:24px;
+  margin:0 0 8px;
+}
+.instructions{color:var(--muted);font-size:15.5px;line-height:1.65;margin-bottom:20px;}
+
+.btn{
+  background:var(--accent);
+  color:#241a05;
+  border:none;
+  padding:13px 22px;
+  border-radius:9px;
+  font-weight:600;
+  font-size:15.5px;
+  cursor:pointer;
+  font-family:inherit;
+  transition:transform .1s ease, background .15s ease;
+}
+.btn:hover{background:#eec155;}
+.btn:active{transform:scale(0.97);}
+.btn:focus-visible{outline:2px solid var(--ring);outline-offset:2px;}
+.btn.secondary{
+  background:transparent;
+  color:var(--text);
+  border:1px solid rgba(255,255,255,0.18);
+}
+.btn.secondary:hover{background:rgba(255,255,255,0.06);}
+.btn:disabled{opacity:0.4;cursor:not-allowed;}
+
+.stat-row{display:flex;gap:24px;margin:18px 0;flex-wrap:wrap;}
+.stat{background:var(--surface-2);border-radius:10px;padding:12px 18px;min-width:100px;}
+.stat .n{font-family:'Fraunces',serif;font-size:26px;font-weight:600;display:block;}
+.stat .l{font-size:12.5px;color:var(--muted);text-transform:uppercase;letter-spacing:0.06em;}
+
+.ring-wrap{display:flex;align-items:center;gap:16px;margin-bottom:18px;}
+.ring{position:relative;width:56px;height:56px;flex-shrink:0;}
+.ring svg{transform:rotate(-90deg);}
+.ring circle{fill:none;stroke-width:5;}
+.ring .bg{stroke:rgba(255,255,255,0.08);}
+.ring .fg{stroke:var(--accent);stroke-linecap:round;transition:stroke-dashoffset .3s linear;}
+.ring .num{
+  position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
+  font-weight:700;font-size:14px;
+}
+
+/* Stroop */
+.stroop-word{
+  font-family:'Fraunces',serif;
+  font-size:56px;
+  font-weight:700;
+  text-align:center;
+  margin:30px 0;
+  min-height:70px;
+}
+.color-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;max-width:480px;margin:0 auto;}
+.color-btn{
+  padding:16px 0;border-radius:10px;border:none;cursor:pointer;
+  font-weight:700;font-size:15.5px;color:#111;font-family:inherit;
+  transition:transform .1s ease;
+}
+.color-btn:active{transform:scale(0.95);}
+.feedback{text-align:center;font-size:15.5px;height:22px;margin-top:14px;color:var(--muted);}
+
+/* Merkspanne */
+.digit-display{
+  font-family:'Fraunces',serif;
+  font-size:64px;
+  font-weight:600;
+  text-align:center;
+  margin:34px 0;
+  letter-spacing:0.05em;
+  min-height:80px;
+  color:var(--accent);
+}
+.numpad{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;max-width:280px;margin:0 auto;}
+.numpad button{
+  background:var(--surface-2);border:1px solid rgba(255,255,255,0.08);
+  color:var(--text);font-size:22px;font-weight:600;padding:17px 0;border-radius:10px;
+  cursor:pointer;font-family:inherit;
+}
+.numpad button:hover{background:rgba(255,255,255,0.08);}
+.input-display{
+  text-align:center;font-family:'Fraunces',serif;font-size:28px;
+  min-height:42px;margin-bottom:16px;letter-spacing:0.1em;color:var(--calm);
+}
+
+/* Visuelle Suche */
+.search-grid{
+  display:grid;
+  grid-template-columns:repeat(10,1fr);
+  gap:6px;
+  max-width:520px;
+  margin:20px auto;
+  user-select:none;
+}
+.search-cell{
+  aspect-ratio:1;
+  display:flex;align-items:center;justify-content:center;
+  font-size:20px;font-weight:700;
+  background:var(--surface-2);
+  border-radius:6px;
+  cursor:pointer;
+  border:2px solid transparent;
+}
+.search-cell.found{background:var(--calm);color:#0a1e19;border-color:var(--calm);}
+.search-cell.wrong{border-color:var(--danger);}
+.target-badge{
+  display:inline-flex;align-items:center;justify-content:center;
+  width:38px;height:38px;background:var(--accent);color:#241a05;
+  border-radius:8px;font-weight:700;font-size:18px;margin:0 6px;
+}
+
+/* Kopfrechnen */
+.math-problem{
+  font-family:'Fraunces',serif;
+  font-size:44px;font-weight:600;text-align:center;margin:28px 0 18px;
+}
+.math-input{
+  display:flex;gap:10px;justify-content:center;margin-bottom:16px;
+}
+.math-input input{
+  width:130px;padding:13px;border-radius:10px;border:1px solid rgba(255,255,255,0.15);
+  background:var(--surface-2);color:var(--text);font-size:19px;text-align:center;font-family:inherit;
+}
+.math-input input:focus{outline:2px solid var(--ring);}
+
+.difficulty-row{display:flex;align-items:center;gap:10px;margin-bottom:18px;flex-wrap:wrap;}
+.difficulty-row label{font-size:14.5px;color:var(--muted);}
+select.diff-select{
+  background:var(--surface-2);color:var(--text);border:1px solid rgba(255,255,255,0.15);
+  border-radius:8px;padding:9px 14px;font-family:inherit;font-size:14.5px;cursor:pointer;
+}
+select.diff-select:focus-visible{outline:2px solid var(--ring);}
+
+/* N-Back */
+.nback-letter{
+  font-family:'Fraunces',serif;font-size:72px;font-weight:700;text-align:center;
+  margin:30px 0;min-height:90px;color:var(--accent);
+}
+.nback-controls{display:flex;gap:12px;justify-content:center;}
+
+/* Reihenfolge */
+.seq-grid{display:flex;flex-wrap:wrap;gap:10px;justify-content:center;max-width:520px;margin:20px auto;}
+.seq-item{
+  width:56px;height:56px;border-radius:10px;background:var(--surface-2);
+  display:flex;align-items:center;justify-content:center;font-weight:700;font-size:18px;
+  cursor:pointer;border:2px solid transparent;user-select:none;
+}
+.seq-item.done{background:var(--calm);color:#0a1e19;border-color:var(--calm);}
+.seq-item.wrong{border-color:var(--danger);}
+
+/* Wortflüssigkeit */
+.prompt-box{
+  background:var(--surface-2);text-align:center;padding:14px;border-radius:12px;margin-bottom:16px;
+}
+.prompt-box .label{font-size:13px;color:var(--muted);text-transform:uppercase;letter-spacing:0.06em;}
+.prompt-box .value{font-family:'Fraunces',serif;font-size:26px;font-weight:600;margin-top:4px;}
+.word-input-row{display:flex;gap:10px;margin-bottom:14px;}
+.word-input-row input{
+  flex:1;padding:13px;border-radius:10px;border:1px solid rgba(255,255,255,0.15);
+  background:var(--surface-2);color:var(--text);font-size:17px;font-family:inherit;
+}
+.word-input-row input:focus{outline:2px solid var(--ring);}
+.word-list{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px;min-height:40px;}
+.word-chip{background:var(--surface-2);border-radius:20px;padding:7px 15px;font-size:14.5px;color:var(--calm);}
+
+.progress-block{
+  background:var(--surface-2);border-radius:12px;padding:18px 20px;margin-bottom:14px;
+}
+.progress-block h3{
+  font-family:'Fraunces',serif;font-weight:600;font-size:18px;margin:0 0 10px;
+}
+.history-list{margin-top:12px;border-top:1px solid rgba(255,255,255,0.08);padding-top:10px;}
+.history-row{
+  display:flex;justify-content:space-between;font-size:14px;color:var(--muted);padding:5px 0;
+}
+.history-row span:last-child{color:var(--text);font-weight:500;}
+
+.reaction-box{
+  height:170px;border-radius:16px;display:flex;align-items:center;justify-content:center;
+  font-weight:700;font-size:22px;cursor:pointer;user-select:none;
+  background:var(--surface-2);color:var(--muted);transition:background .12s ease,color .12s ease;
+}
+.reaction-box.waiting{background:var(--danger);color:#2b0a08;}
+.reaction-box.go{background:var(--calm);color:#062019;}
+
+.tiles-grid{
+  display:grid;
+  gap:10px;
+  max-width:340px;
+  margin:22px auto;
+}
+.tile{
+  aspect-ratio:1;
+  background:var(--surface-2);
+  border-radius:10px;
+  cursor:pointer;
+  border:2px solid rgba(255,255,255,0.06);
+  transition:background .12s ease;
+}
+.tile.lit{background:var(--accent);}
+.tile.wrong{background:var(--danger);}
+.tile.correct{background:var(--calm);}
+
+.summary{
+  background:var(--surface-2);border-radius:12px;padding:18px 20px;margin-top:18px;
+  font-size:15.5px;line-height:1.65;
+}
+.summary strong{color:var(--accent);}
+
+footer{
+  margin-top:32px;color:var(--muted);font-size:14px;line-height:1.65;
+  border-top:1px solid rgba(255,255,255,0.08);padding-top:16px;
+}
+
+@media (max-width:480px){
+  .search-grid{grid-template-columns:repeat(6,1fr);}
+  .color-grid{grid-template-columns:repeat(2,1fr);}
+  .stroop-word{font-size:40px;}
+}
+</style>
 </head>
-<body class="bg-[#0b0f19] text-slate-200 min-h-screen flex flex-col font-sans antialiased relative overflow-x-hidden">
+<body>
+<div class="wrap">
+  <header>
+    <div class="eyebrow">Kognitives Training</div>
+  </header>
 
-    <!-- Hintergrund-Glow -->
-    <div class="absolute top-[-10%] left-1/2 -translate-x-1/2 w-[800px] h-[600px] bg-emerald-500/10 blur-[150px] rounded-full pointer-events-none"></div>
+  <div class="app-shell">
+  <nav class="tabs">
+    <button class="tab" data-panel="progress">Fortschritt</button>
+    <button class="tab active" data-panel="stroop">Farb-Wort-Test</button>
+    <button class="tab" data-panel="memory">Merkspanne</button>
+    <button class="tab" data-panel="search">Visuelle Suche</button>
+    <button class="tab" data-panel="math">Kopfrechnen</button>
+    <button class="tab" data-panel="nback">N-Back</button>
+    <button class="tab" data-panel="sequence">Reihenfolge</button>
+    <button class="tab" data-panel="fluency">Wortflüssigkeit</button>
+    <button class="tab" data-panel="reaction">Reaktionstest</button>
+    <button class="tab" data-panel="wordmemory">Wortgedächtnis</button>
+    <button class="tab" data-panel="tiles">Muster merken</button>
+    <button class="tab" data-panel="visualmemory">Visuelles Gedächtnis</button>
+  </nav>
 
-    <!-- NAVIGATION -->
-    <header class="w-full max-w-6xl mx-auto px-6 py-6 flex justify-between items-center relative z-10">
-        <div class="text-xl font-bold tracking-wider text-emerald-400 font-mono">
-            rmi-net<span class="text-slate-500">.github.io</span>
+  <div class="content-area">
+  <section class="panel" id="panel-progress">
+    <div class="card">
+      <h2>Dein Fortschritt</h2>
+      <p class="instructions">Ergebnisse werden automatisch in diesem Browser gespeichert. So siehst du, wie sich deine Werte über die Zeit entwickeln.</p>
+      <div id="progress-content"><p class="instructions">Lade Fortschritt…</p></div>
+      <div style="margin-top:8px;">
+        <button class="btn secondary" id="progress-reset">Verlauf zurücksetzen</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- STROOP -->
+  <section class="panel active" id="panel-stroop">
+    <div class="card">
+      <h2>Farb-Wort-Interferenz (Stroop)</h2>
+      <p class="instructions">Ein Wort erscheint in einer Schriftfarbe, die nicht zur Wortbedeutung passt. Klicke so schnell wie möglich auf die <b>Farbe der Schrift</b> — nicht auf das, was das Wort sagt. Trainiert Impulskontrolle und selektive Aufmerksamkeit.</p>
+      <div class="difficulty-row">
+        <label for="stroop-difficulty">Dauer:</label>
+        <select id="stroop-difficulty" class="diff-select">
+          <option value="90">Entspannt (90s)</option>
+          <option value="60" selected>Standard (60s)</option>
+          <option value="40">Schnell (40s)</option>
+        </select>
+      </div>
+      <div class="stat-row">
+        <div class="stat"><span class="n" id="stroop-score">0</span><span class="l">Richtig</span></div>
+        <div class="stat"><span class="n" id="stroop-errors">0</span><span class="l">Fehler</span></div>
+        <div class="stat"><span class="n" id="stroop-time">60</span><span class="l">Sekunden</span></div>
+      </div>
+      <div class="stroop-word" id="stroop-word">Bereit?</div>
+      <div class="color-grid" id="stroop-buttons"></div>
+      <div class="feedback" id="stroop-feedback"></div>
+      <div style="text-align:center;margin-top:18px;">
+        <button class="btn" id="stroop-start">Start</button>
+      </div>
+      <div class="summary" id="stroop-summary" style="display:none;"></div>
+    </div>
+  </section>
+
+  <!-- MEMORY -->
+  <section class="panel" id="panel-memory">
+    <div class="card">
+      <h2>Merkspanne</h2>
+      <p class="instructions">Merke dir die Zahlenfolge, die kurz eingeblendet wird, und tippe sie danach in derselben Reihenfolge ein. Nach jeder richtigen Runde wird die Folge um eine Ziffer länger. Trainiert das Arbeitsgedächtnis.</p>
+      <div class="difficulty-row">
+        <label for="memory-difficulty">Startlänge:</label>
+        <select id="memory-difficulty" class="diff-select">
+          <option value="2">Leicht (2 Ziffern)</option>
+          <option value="3" selected>Mittel (3 Ziffern)</option>
+          <option value="5">Schwer (5 Ziffern)</option>
+        </select>
+      </div>
+      <div class="stat-row">
+        <div class="stat"><span class="n" id="memory-level">3</span><span class="l">Länge</span></div>
+        <div class="stat"><span class="n" id="memory-best">0</span><span class="l">Bestwert</span></div>
+      </div>
+      <div class="digit-display" id="memory-display">Bereit?</div>
+      <div class="input-display" id="memory-input-display"></div>
+      <div class="numpad" id="memory-numpad" style="display:none;">
+        <button data-d="1">1</button><button data-d="2">2</button><button data-d="3">3</button>
+        <button data-d="4">4</button><button data-d="5">5</button><button data-d="6">6</button>
+        <button data-d="7">7</button><button data-d="8">8</button><button data-d="9">9</button>
+        <button id="memory-clear">Löschen</button><button data-d="0">0</button><button id="memory-submit">OK</button>
+      </div>
+      <div style="text-align:center;margin-top:18px;">
+        <button class="btn" id="memory-start">Start</button>
+      </div>
+      <div class="summary" id="memory-summary" style="display:none;"></div>
+    </div>
+  </section>
+
+  <!-- SEARCH -->
+  <section class="panel" id="panel-search">
+    <div class="card">
+      <h2>Visuelle Suche</h2>
+      <p class="instructions">Finde und klicke alle Felder mit dem Zielsymbol <span class="target-badge" id="search-target-preview">X</span> so schnell wie möglich. Trainiert visuelles Scanning und selektive Aufmerksamkeit.</p>
+      <div class="difficulty-row">
+        <label for="search-difficulty">Rastergröße:</label>
+        <select id="search-difficulty" class="diff-select">
+          <option value="40">Leicht (40 Felder)</option>
+          <option value="60" selected>Mittel (60 Felder)</option>
+          <option value="90">Schwer (90 Felder)</option>
+        </select>
+      </div>
+      <div class="stat-row">
+        <div class="stat"><span class="n" id="search-found">0</span><span class="l">Gefunden</span></div>
+        <div class="stat"><span class="n" id="search-total">0</span><span class="l">Gesamt</span></div>
+        <div class="stat"><span class="n" id="search-time">0.0</span><span class="l">Sekunden</span></div>
+      </div>
+      <div class="search-grid" id="search-grid"></div>
+      <div style="text-align:center;margin-top:10px;">
+        <button class="btn" id="search-start">Neues Raster</button>
+      </div>
+      <div class="summary" id="search-summary" style="display:none;"></div>
+    </div>
+  </section>
+
+  <!-- MATH -->
+  <section class="panel" id="panel-math">
+    <div class="card">
+      <h2>Kopfrechnen unter Zeitdruck</h2>
+      <p class="instructions">Löse so viele Aufgaben wie möglich in 45 Sekunden. Trainiert Verarbeitungsgeschwindigkeit und Konzentration unter Zeitdruck.</p>
+      <div class="difficulty-row">
+        <label for="math-difficulty">Schwierigkeit:</label>
+        <select id="math-difficulty" class="diff-select">
+          <option value="easy">Leicht (+ / −, kleine Zahlen)</option>
+          <option value="medium" selected>Mittel (+ / − / ×)</option>
+          <option value="hard">Schwer (größere Zahlen, kurze Zeit)</option>
+        </select>
+      </div>
+      <div class="stat-row">
+        <div class="stat"><span class="n" id="math-score">0</span><span class="l">Richtig</span></div>
+        <div class="stat"><span class="n" id="math-errors">0</span><span class="l">Fehler</span></div>
+        <div class="stat"><span class="n" id="math-time">45</span><span class="l">Sekunden</span></div>
+      </div>
+      <div class="math-problem" id="math-problem">Bereit?</div>
+      <div class="math-input">
+        <input type="number" id="math-answer" placeholder="Antwort" disabled>
+        <button class="btn" id="math-submit" disabled>OK</button>
+      </div>
+      <div style="text-align:center;">
+        <button class="btn" id="math-start">Start</button>
+      </div>
+      <div class="summary" id="math-summary" style="display:none;"></div>
+    </div>
+  </section>
+
+  <!-- N-BACK -->
+  <section class="panel" id="panel-nback">
+    <div class="card">
+      <h2>N-Back</h2>
+      <p class="instructions">Buchstaben erscheinen nacheinander. Klicke „Treffer“ (oder drücke die Leertaste), wenn der aktuelle Buchstabe derselbe ist wie vor N Schritten. Trainiert Arbeitsgedächtnis und anhaltende Aufmerksamkeit.</p>
+      <div class="difficulty-row">
+        <label for="nback-difficulty">Schwierigkeit:</label>
+        <select id="nback-difficulty" class="diff-select">
+          <option value="1">Leicht (1-Back)</option>
+          <option value="2" selected>Mittel (2-Back)</option>
+          <option value="3">Schwer (3-Back)</option>
+        </select>
+      </div>
+      <div class="stat-row">
+        <div class="stat"><span class="n" id="nback-hits">0</span><span class="l">Treffer</span></div>
+        <div class="stat"><span class="n" id="nback-misses">0</span><span class="l">Verpasst</span></div>
+        <div class="stat"><span class="n" id="nback-false">0</span><span class="l">Fehlalarme</span></div>
+        <div class="stat"><span class="n" id="nback-round">0</span><span class="l">/ 20 Runden</span></div>
+      </div>
+      <div class="nback-letter" id="nback-letter">Bereit?</div>
+      <div class="nback-controls">
+        <button class="btn" id="nback-match" disabled>Treffer</button>
+      </div>
+      <div style="text-align:center;margin-top:18px;">
+        <button class="btn secondary" id="nback-start">Start</button>
+      </div>
+      <div class="summary" id="nback-summary" style="display:none;"></div>
+    </div>
+  </section>
+
+  <!-- SEQUENCE -->
+  <section class="panel" id="panel-sequence">
+    <div class="card">
+      <h2>Reihenfolge finden</h2>
+      <p class="instructions">Klicke die Zahlen so schnell wie möglich in aufsteigender Reihenfolge an. Trainiert visuelle Verarbeitungsgeschwindigkeit und kognitive Flexibilität.</p>
+      <div class="difficulty-row">
+        <label for="seq-difficulty">Schwierigkeit:</label>
+        <select id="seq-difficulty" class="diff-select">
+          <option value="8">Leicht (8 Zahlen)</option>
+          <option value="12" selected>Mittel (12 Zahlen)</option>
+          <option value="18">Schwer (18 Zahlen)</option>
+        </select>
+      </div>
+      <div class="stat-row">
+        <div class="stat"><span class="n" id="seq-next">1</span><span class="l">Als nächstes</span></div>
+        <div class="stat"><span class="n" id="seq-time">0.0</span><span class="l">Sekunden</span></div>
+      </div>
+      <div class="seq-grid" id="seq-grid"></div>
+      <div style="text-align:center;margin-top:10px;">
+        <button class="btn" id="seq-start">Start</button>
+      </div>
+      <div class="summary" id="seq-summary" style="display:none;"></div>
+    </div>
+  </section>
+
+  <!-- FLUENCY -->
+  <section class="panel" id="panel-fluency">
+    <div class="card">
+      <h2>Wortflüssigkeit</h2>
+      <p class="instructions">Nenne so viele passende Wörter wie möglich. Wort eintippen und Enter drücken. Trainiert Wortabruf und exekutive Funktionen.</p>
+      <div class="difficulty-row">
+        <label for="fluency-difficulty">Dauer:</label>
+        <select id="fluency-difficulty" class="diff-select">
+          <option value="90">Entspannt (90s)</option>
+          <option value="60" selected>Standard (60s)</option>
+          <option value="45">Schnell (45s)</option>
+        </select>
+      </div>
+      <div class="stat-row">
+        <div class="stat"><span class="n" id="fluency-count">0</span><span class="l">Wörter</span></div>
+        <div class="stat"><span class="n" id="fluency-time">60</span><span class="l">Sekunden</span></div>
+      </div>
+      <div class="prompt-box">
+        <div class="label">Vorgabe</div>
+        <div class="value" id="fluency-prompt">Bereit?</div>
+      </div>
+      <div class="word-input-row">
+        <input type="text" id="fluency-input" placeholder="Wort eingeben und Enter drücken" disabled>
+      </div>
+      <div class="word-list" id="fluency-list"></div>
+      <div style="text-align:center;margin-top:10px;">
+        <button class="btn" id="fluency-start">Start</button>
+      </div>
+      <div class="summary" id="fluency-summary" style="display:none;"></div>
+    </div>
+  </section>
+
+  <!-- REACTION -->
+  <section class="panel" id="panel-reaction">
+    <div class="card">
+      <h2>Reaktionstest</h2>
+      <p class="instructions">Klicke auf das Feld, sobald es von Rot auf Grün wechselt. Ein Klick auf Rot zählt als Fehlstart. Trainiert Reaktionsgeschwindigkeit und Daueraufmerksamkeit.</p>
+      <div class="difficulty-row">
+        <label for="reaction-difficulty">Runden:</label>
+        <select id="reaction-difficulty" class="diff-select">
+          <option value="5">Kurz (5 Runden)</option>
+          <option value="8" selected>Standard (8 Runden)</option>
+          <option value="12">Lang (12 Runden)</option>
+        </select>
+      </div>
+      <div class="stat-row">
+        <div class="stat"><span class="n" id="reaction-round">0</span><span class="l">Runde</span></div>
+        <div class="stat"><span class="n" id="reaction-avg">–</span><span class="l">Ø ms</span></div>
+        <div class="stat"><span class="n" id="reaction-false">0</span><span class="l">Fehlstarts</span></div>
+      </div>
+      <div class="reaction-box" id="reaction-box">Start drücken</div>
+      <div style="text-align:center;margin-top:18px;">
+        <button class="btn" id="reaction-start">Start</button>
+      </div>
+      <div class="summary" id="reaction-summary" style="display:none;"></div>
+    </div>
+  </section>
+
+  <!-- WORDMEMORY -->
+  <section class="panel" id="panel-wordmemory">
+    <div class="card">
+      <h2>Wortgedächtnis</h2>
+      <p class="instructions">Präge dir die Wortliste ein. Nach Ablauf der Zeit tippst du so viele Wörter wie möglich aus dem Gedächtnis ein (Enter zum Hinzufügen). Trainiert das verbale Gedächtnis.</p>
+      <div class="difficulty-row">
+        <label for="wordmemory-difficulty">Schwierigkeit:</label>
+        <select id="wordmemory-difficulty" class="diff-select">
+          <option value="8">Leicht (8 Wörter)</option>
+          <option value="12" selected>Mittel (12 Wörter)</option>
+          <option value="16">Schwer (16 Wörter)</option>
+        </select>
+      </div>
+      <div class="stat-row">
+        <div class="stat"><span class="n" id="wordmemory-phase-label">Bereit</span><span class="l">Phase</span></div>
+        <div class="stat"><span class="n" id="wordmemory-timer">–</span><span class="l">Sekunden</span></div>
+      </div>
+      <div id="wordmemory-study-area" class="word-list" style="min-height:60px;"></div>
+      <div id="wordmemory-recall-area" style="display:none;">
+        <div class="word-input-row">
+          <input type="text" id="wordmemory-input" placeholder="Wort eingeben und Enter drücken" disabled>
         </div>
-        <nav class="flex gap-6 text-sm font-mono text-slate-400">
-            <a href="#projekte" class="hover:text-emerald-400 transition-colors">/ projekte</a>
-            <a href="#kontakt" class="hover:text-emerald-400 transition-colors">/ kontakt</a>
-        </nav>
-    </header>
+        <div class="word-list" id="wordmemory-list"></div>
+      </div>
+      <div style="text-align:center;margin-top:18px;display:flex;gap:10px;justify-content:center;">
+        <button class="btn" id="wordmemory-start">Start</button>
+        <button class="btn secondary" id="wordmemory-finish" style="display:none;">Auswerten</button>
+      </div>
+      <div class="summary" id="wordmemory-summary" style="display:none;"></div>
+    </div>
+  </section>
 
-    <!-- HERO SEKTION -->
-    <main class="flex-grow w-full max-w-6xl mx-auto px-6 flex flex-col justify-center py-20 relative z-10">
-        <div class="max-w-3xl">
-            <span class="px-3 py-1 text-xs font-semibold tracking-widest text-emerald-400 uppercase bg-emerald-500/10 border border-emerald-500/20 rounded-full font-mono">
-                Development & Design
-            </span>
-            <h1 class="text-4xl sm:text-6xl font-black tracking-tight text-white mt-6 mb-6 leading-tight">
-                Training<br>
-            </h1>
-            <p class="text-slate-400 text-lg sm:text-xl max-w-xl leading-relaxed mb-8">
-                Willkommen im digitalen Workspace von rmi-net
-            </p>
-            <div class="flex flex-wrap gap-4">
-                <a href="#projekte" class="px-6 py-3 bg-emerald-500 hover:bg-emerald-600 text-slate-950 font-semibold rounded-lg font-mono transition-all text-sm tracking-wide shadow-lg">
-                    Projekte ansehen
-                </a>
-                <a href="#kontakt" class="px-6 py-3 bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 font-semibold rounded-lg font-mono transition-all text-sm tracking-wide">
-                    Jetzt anfragen
-                </a>
-            </div>
-        </div>
-    </main>
+  <!-- TILES (Sequenzgedächtnis) -->
+  <section class="panel" id="panel-tiles">
+    <div class="card">
+      <h2>Muster merken</h2>
+      <p class="instructions">Kacheln leuchten nacheinander auf. Klicke sie danach in genau dieser Reihenfolge an. Jede richtige Runde macht die Sequenz einen Schritt länger. Trainiert räumliches Arbeitsgedächtnis — anders als die Merkspanne mit Zahlen.</p>
+      <div class="difficulty-row">
+        <label for="tiles-difficulty">Rastergröße:</label>
+        <select id="tiles-difficulty" class="diff-select">
+          <option value="3" selected>Leicht (3×3)</option>
+          <option value="4">Mittel (4×4)</option>
+          <option value="5">Schwer (5×5)</option>
+        </select>
+      </div>
+      <div class="stat-row">
+        <div class="stat"><span class="n" id="tiles-level">0</span><span class="l">Aktuelle Länge</span></div>
+      </div>
+      <div class="tiles-grid" id="tiles-grid"></div>
+      <div style="text-align:center;margin-top:18px;">
+        <button class="btn" id="tiles-start">Start</button>
+      </div>
+      <div class="summary" id="tiles-summary" style="display:none;"></div>
+    </div>
+  </section>
 
-    <!-- PROJEKT SEKTION -->
-    <section id="projekte" class="w-full max-w-6xl mx-auto px-6 py-24 border-t border-slate-900 relative z-10">
-        <div class="mb-12">
-            <h2 class="text-2xl font-bold text-white font-mono">
-                <span class="text-emerald-400">#</span> Aktuelle Projekte
-            </h2>
-            <p class="text-slate-400 text-sm mt-1">Auswahl von Unterseiten</p>
-        </div>
+  <!-- VISUAL MEMORY (gleichzeitig blinkende Kacheln) -->
+  <section class="panel" id="panel-visualmemory">
+    <div class="card">
+      <h2>Visuelles Gedächtnis</h2>
+      <p class="instructions">Mehrere Kacheln leuchten gleichzeitig kurz auf. Merke dir alle und klicke sie an — die Reihenfolge ist egal. Du hast 3 Leben, jeder Fehlklick kostet eins. Anders als "Muster merken": Hier zählt nicht die Abfolge, sondern welche Kacheln gemeinsam markiert waren.</p>
+      <div class="difficulty-row">
+        <label for="visualmem-difficulty">Rastergröße:</label>
+        <select id="visualmem-difficulty" class="diff-select">
+          <option value="4" selected>Leicht (4×4)</option>
+          <option value="5">Mittel (5×5)</option>
+          <option value="6">Schwer (6×6)</option>
+        </select>
+      </div>
+      <div class="stat-row">
+        <div class="stat"><span class="n" id="visualmem-level">0</span><span class="l">Level</span></div>
+        <div class="stat"><span class="n" id="visualmem-lives">3</span><span class="l">Leben</span></div>
+      </div>
+      <div class="tiles-grid" id="visualmem-grid"></div>
+      <div style="text-align:center;margin-top:18px;">
+        <button class="btn" id="visualmem-start">Start</button>
+      </div>
+      <div class="summary" id="visualmem-summary" style="display:none;"></div>
+    </div>
+  </section>
 
-        <!-- Projekt-Grid -->
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-            
-            <!-- Projekt 1 (Training) -->
-            <div class="bg-slate-900/40 border border-slate-800 rounded-xl p-6 hover:border-emerald-500/30 transition-all flex flex-col justify-between group">
-                <div>
-                    <div class="flex justify-between items-start mb-4">
-                        <span class="text-xs font-mono text-emerald-400 bg-emerald-500/5 px-2 py-1 border border-emerald-500/10 rounded">HTML / Tailwind</span>
-                        <span class="text-xs font-mono text-amber-400 bg-amber-500/5 px-2 py-1 border border-amber-500/10 rounded">In Vorbereitung</span>
-                    </div>
-                    <h3 class="text-xl font-bold text-white mb-2 group-hover:text-emerald-400 transition-colors">Training Website</h3>
-                    <p class="text-slate-400 text-sm leading-relaxed mb-6">
-                        Training-Page
-                    </p>
-                </div>
-                <a href="./training/" class="text-sm font-mono text-slate-400 hover:text-white flex items-center gap-1 mt-auto">
-                    Live-Demo öffnen &rarr;
-                </a>
-            </div>
+  </div>
+  </div>
 
-            <!-- Projekt 2 -->
-            <div class="bg-slate-900/40 border border-slate-800 rounded-xl p-6 hover:border-emerald-500/30 transition-all flex flex-col justify-between group">
-                <div>
-                    <div class="flex justify-between items-start mb-4">
-                        <span class="text-xs font-mono text-emerald-400 bg-emerald-500/5 px-2 py-1 border border-emerald-500/10 rounded">Vue.js / CSS</span>
-                        <span class="text-xs font-mono text-slate-500 bg-slate-800/20 px-2 py-1 rounded">Geplant</span>
-                    </div>
-                    <h3 class="text-xl font-bold text-white mb-2 group-hover:text-emerald-400 transition-colors">Portfolio</h3>
-                    <p class="text-slate-400 text-sm leading-relaxed mb-6">
-                        Portfolio-Layout
-                    </p>
-                </div>
-                <span class="text-sm font-mono text-slate-600 flex items-center gap-1 mt-auto cursor-not-allowed">
-                    Noch nicht aktiv
-                </span>
-            </div>
+  <footer>
+    Diese Übungen dienen dem allgemeinen kognitiven Training und ersetzen keine ergotherapeutische Behandlung oder fachliche Diagnostik. Bei anhaltenden Konzentrations- oder Gedächtnisproblemen sprich bitte mit einer Ergotherapeutin, einem Arzt oder einer entsprechenden Fachperson. Deine Ergebnisse werden lokal in diesem Browser gespeichert (localStorage) — nicht in der Cloud, kein Account. Das heißt aber auch: anderer Browser, anderes Gerät oder gelöschte Browserdaten = Verlauf weg. Im Reiter „Fortschritt“ kannst du den Verlauf jederzeit selbst zurücksetzen.
+  </footer>
+</div>
 
-        </div>
-    </section>
+<script>
+// ---------- TAB SWITCHING ----------
+const tabs = document.querySelectorAll('.tab');
+const panels = document.querySelectorAll('.panel');
+let activeIntervals = [];
+function clearAllIntervals(){
+  activeIntervals.forEach(id=>clearInterval(id));
+  activeIntervals=[];
+  if(typeof reactionState!=='undefined' && reactionState && reactionState.timeoutRef){
+    clearTimeout(reactionState.timeoutRef);
+    reactionState.timeoutRef=null;
+  }
+  if(typeof tilesState!=='undefined' && tilesState && tilesState.pendingTimeouts){
+    tilesState.pendingTimeouts.forEach(id=>clearTimeout(id));
+    tilesState.pendingTimeouts=[];
+    tilesState.running=false;
+  }
+  if(typeof visualMemState!=='undefined' && visualMemState && visualMemState.pendingTimeouts){
+    visualMemState.pendingTimeouts.forEach(id=>clearTimeout(id));
+    visualMemState.pendingTimeouts=[];
+    visualMemState.running=false;
+  }
+}
+tabs.forEach(tab=>{
+  tab.addEventListener('click', ()=>{
+    clearAllIntervals();
+    tabs.forEach(t=>t.classList.remove('active'));
+    panels.forEach(p=>p.classList.remove('active'));
+    tab.classList.add('active');
+    document.getElementById('panel-'+tab.dataset.panel).classList.add('active');
+    if(tab.dataset.panel === 'progress'){ renderProgress(); }
+  });
+});
 
-    <!-- KONTAKT SEKTION -->
-    <section id="kontakt" class="w-full max-w-3xl mx-auto px-6 py-24 border-t border-slate-900 relative z-10 text-center">
-        <h2 class="text-3xl font-black text-white mb-4">KONTAKT</h2>
-        <p class="text-slate-400 mb-8 max-w-md mx-auto">
-            Haben Sie Fragen oder möchten Sie eine eigene Website erstellen? Schreiben Sie mir eine Nachricht.
-        </p>
-        
-        <form id="contactForm" class="text-left space-y-4 max-w-lg mx-auto bg-slate-900/20 p-6 rounded-xl border border-slate-800">
-            <div>
-                <label class="block text-xs font-mono text-slate-400 uppercase tracking-wider mb-2">Name</label>
-                <input type="text" required class="w-full bg-slate-950 border border-slate-800 rounded-lg px-4 py-2.5 text-slate-200 focus:outline-none focus:border-emerald-500 text-sm">
-            </div>
-            <div>
-                <label class="block text-xs font-mono text-slate-400 uppercase tracking-wider mb-2">E-Mail-Adresse</label>
-                <input type="email" required class="w-full bg-slate-950 border border-slate-800 rounded-lg px-4 py-2.5 text-slate-200 focus:outline-none focus:border-emerald-500 text-sm">
-            </div>
-            <div>
-                <label class="block text-xs font-mono text-slate-400 uppercase tracking-wider mb-2">Nachricht</label>
-                <textarea required rows="4" class="w-full bg-slate-950 border border-slate-800 rounded-lg px-4 py-2.5 text-slate-200 focus:outline-none focus:border-emerald-500 text-sm"></textarea>
-            </div>
-            <button type="submit" class="w-full py-3 bg-slate-800 hover:bg-slate-700 text-emerald-400 font-mono font-semibold rounded-lg text-sm transition-all border border-slate-700">
-                Nachricht senden
-            </button>
-        </form>
-        <div id="successMessage" class="hidden max-w-lg mx-auto mt-4 p-4 bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-sm rounded-lg font-mono">
-            ✓ Danke! Die Nachricht wurde erfolgreich übermittelt.
-        </div>
-    </section>
+// ================= FORTSCHRITT (persistente Speicherung) =================
+const EXERCISE_META = [
+  {id:'stroop', name:'Farb-Wort-Test', unit:'richtige', higherBetter:true, decimals:0},
+  {id:'memory', name:'Merkspanne', unit:'Ziffern', higherBetter:true, decimals:0},
+  {id:'search', name:'Visuelle Suche', unit:'Sek.', higherBetter:false, decimals:1},
+  {id:'math', name:'Kopfrechnen', unit:'richtige', higherBetter:true, decimals:0},
+  {id:'nback', name:'N-Back', unit:'Nettotreffer', higherBetter:true, decimals:0},
+  {id:'sequence', name:'Reihenfolge', unit:'Sek.', higherBetter:false, decimals:1},
+  {id:'fluency', name:'Wortflüssigkeit', unit:'Wörter', higherBetter:true, decimals:0},
+  {id:'reaction', name:'Reaktionstest', unit:'ms', higherBetter:false, decimals:0},
+  {id:'wordmemory', name:'Wortgedächtnis', unit:'Wörter', higherBetter:true, decimals:0},
+  {id:'tiles', name:'Muster merken', unit:'Felder', higherBetter:true, decimals:0},
+  {id:'visualmemory', name:'Visuelles Gedächtnis', unit:'Level', higherBetter:true, decimals:0},
+];
 
-    <!-- FOOTER -->
-    <footer class="w-full max-w-6xl mx-auto px-6 py-8 border-t border-slate-900 flex flex-col sm:flex-row justify-between items-center gap-4 text-xs font-mono text-slate-500 relative z-10">
-        <div>&copy; 2026 rmi-net. Alle Rechte vorbehalten.</div>
-        <div>Powered by Claude & GitHub Pages</div>
-    </footer>
+async function pushHistory(id, metric, label, extra){
+  try{
+    let arr = [];
+    try{
+      const raw = localStorage.getItem('history_'+id);
+      if(raw) arr = JSON.parse(raw);
+    }catch(e){ arr = []; }
+    arr.push(Object.assign({date: new Date().toISOString(), metric, label}, extra||{}));
+    if(arr.length > 25) arr = arr.slice(arr.length-25);
+    localStorage.setItem('history_'+id, JSON.stringify(arr));
+    showStorageStatus(true, id);
+  }catch(e){
+    console.error('Speicherfehler beim Sichern des Fortschritts:', e);
+    showStorageStatus(false, id, e);
+  }
+  const progressPanel = document.getElementById('panel-progress');
+  if(progressPanel && progressPanel.classList.contains('active')){ renderProgress(); }
+}
 
-    <!-- Formular-Logik -->
-    <script>
-        document.getElementById('contactForm').addEventListener('submit', function(e) {
-            e.preventDefault();
-            this.reset();
-            const msg = document.getElementById('successMessage');
-            msg.classList.remove('hidden');
-            setTimeout(() => msg.classList.add('hidden'), 5000);
-        });
-    </script>
+function showStorageStatus(success, exerciseId, err){
+  const activePanel = document.querySelector('.panel.active');
+  if(!activePanel) return;
+  const summary = activePanel.querySelector('.summary');
+  if(!summary) return;
+  let note = summary.querySelector('.storage-note');
+  if(!note){
+    note = document.createElement('div');
+    note.className = 'storage-note';
+    note.style.marginTop = '10px';
+    note.style.fontSize = '13px';
+    summary.appendChild(note);
+  }
+  if(success){
+    note.style.color = 'var(--calm)';
+    note.textContent = '✓ Ergebnis im Fortschritt gespeichert.';
+  } else {
+    note.style.color = 'var(--danger)';
+    note.textContent = '⚠ Ergebnis konnte NICHT gespeichert werden (' + (err && err.message ? err.message : 'localStorage nicht verfügbar') + '). Möglicherweise ist der private/Inkognito-Modus aktiv oder der Browser blockiert lokalen Speicher für diese Datei.';
+  }
+}
+
+function formatMetric(m, ex){
+  if(ex.decimals===0) return Math.round(m);
+  return Number(m).toFixed(ex.decimals);
+}
+function formatDate(iso){
+  const d = new Date(iso);
+  return d.toLocaleDateString('de-DE',{day:'2-digit',month:'2-digit'}) + ' ' + d.toLocaleTimeString('de-DE',{hour:'2-digit',minute:'2-digit'});
+}
+
+async function renderProgress(){
+  const container = document.getElementById('progress-content');
+
+  let storageWorks = true;
+  try{
+    const testKey = '__storage_test__';
+    localStorage.setItem(testKey, '1');
+    localStorage.removeItem(testKey);
+  }catch(e){ storageWorks = false; }
+
+  if(!storageWorks){
+    container.innerHTML = `<div class="progress-block" style="border:1px solid var(--danger);">
+      <h3 style="color:var(--danger);">Speicherung nicht verfügbar</h3>
+      <p class="instructions" style="margin-bottom:0;">
+        <code>localStorage</code> ist in diesem Browser-Kontext blockiert oder nicht vorhanden — zum Beispiel im privaten/Inkognito-Modus, oder weil der Browser lokalen Speicher für Dateien generell einschränkt. In diesem Fall kann kein Fortschritt gespeichert werden.
+      </p>
+    </div>`;
+    return;
+  }
+
+  let html = '';
+  for(const ex of EXERCISE_META){
+    let arr = [];
+    try{
+      const raw = localStorage.getItem('history_'+ex.id);
+      if(raw) arr = JSON.parse(raw);
+    }catch(e){
+      html += `<div class="progress-block" style="border:1px solid var(--danger);"><h3>${ex.name}</h3><p class="instructions" style="margin-bottom:0;color:var(--danger);">Fehler beim Laden: ${e.message}</p></div>`;
+      continue;
+    }
+    if(!arr || arr.length===0){
+      html += `<div class="progress-block"><h3>${ex.name}</h3><p class="instructions" style="margin-bottom:0;">Noch keine gespeicherten Ergebnisse.</p></div>`;
+      continue;
+    }
+    const metrics = arr.map(a=>a.metric);
+    const best = ex.higherBetter ? Math.max(...metrics) : Math.min(...metrics);
+    const last = arr[arr.length-1];
+    const recent = arr.slice(-5).reverse();
+    html += `<div class="progress-block">
+      <h3>${ex.name}</h3>
+      <div class="stat-row">
+        <div class="stat"><span class="n">${formatMetric(best,ex)}</span><span class="l">Bestwert (${ex.unit})</span></div>
+        <div class="stat"><span class="n">${formatMetric(last.metric,ex)}</span><span class="l">Letztes Mal</span></div>
+        <div class="stat"><span class="n">${arr.length}</span><span class="l">Durchgänge</span></div>
+      </div>
+      <div class="history-list">
+        ${recent.map(e=>`<div class="history-row"><span>${formatDate(e.date)}</span><span>${formatMetric(e.metric,ex)} ${ex.unit}</span></div>`).join('')}
+      </div>
+    </div>`;
+  }
+  container.innerHTML = html;
+}
+
+document.getElementById('progress-reset').addEventListener('click', async ()=>{
+  const btn = document.getElementById('progress-reset');
+  btn.disabled = true;
+  btn.textContent = 'Wird gelöscht…';
+  try{
+    for(const ex of EXERCISE_META){
+      try{ localStorage.removeItem('history_'+ex.id); }catch(e){ /* Schlüssel existierte evtl. nicht */ }
+    }
+  }catch(e){
+    console.error('Fehler beim Zurücksetzen des Verlaufs:', e);
+  }
+  btn.disabled = false;
+  btn.textContent = 'Verlauf zurücksetzen';
+  renderProgress();
+});
+
+renderProgress();
+
+// ================= STROOP =================
+const STROOP_COLORS = [
+  {name:'Rot', hex:'#D97066'},
+  {name:'Blau', hex:'#6FA8DC'},
+  {name:'Grün', hex:'#6FBFB0'},
+  {name:'Gelb', hex:'#E3B23C'}
+];
+let stroopState = {score:0, errors:0, timeLeft:60, current:null, running:false, reactionTimes:[], startedAt:0};
+
+function buildStroopButtons(){
+  const wrap = document.getElementById('stroop-buttons');
+  wrap.innerHTML='';
+  STROOP_COLORS.forEach(c=>{
+    const b = document.createElement('button');
+    b.className='color-btn';
+    b.style.background=c.hex;
+    b.textContent=c.name;
+    b.addEventListener('click', ()=>handleStroopAnswer(c.name));
+    wrap.appendChild(b);
+  });
+}
+buildStroopButtons();
+
+function newStroopWord(){
+  const wordColor = STROOP_COLORS[Math.floor(Math.random()*STROOP_COLORS.length)];
+  let inkColor = STROOP_COLORS[Math.floor(Math.random()*STROOP_COLORS.length)];
+  while(inkColor.name === wordColor.name){
+    inkColor = STROOP_COLORS[Math.floor(Math.random()*STROOP_COLORS.length)];
+  }
+  stroopState.current = {word: wordColor.name, ink: inkColor.name, hex: inkColor.hex};
+  stroopState.startedAt = Date.now();
+  const el = document.getElementById('stroop-word');
+  el.textContent = wordColor.name;
+  el.style.color = inkColor.hex;
+}
+
+function handleStroopAnswer(chosenName){
+  if(!stroopState.running) return;
+  const fb = document.getElementById('stroop-feedback');
+  const rt = Date.now() - stroopState.startedAt;
+  if(chosenName === stroopState.current.ink){
+    stroopState.score++;
+    stroopState.reactionTimes.push(rt);
+    fb.textContent = 'Richtig — ' + rt + ' ms';
+    fb.style.color = 'var(--calm)';
+  } else {
+    stroopState.errors++;
+    fb.textContent = 'Falsch — richtig war ' + stroopState.current.ink;
+    fb.style.color = 'var(--danger)';
+  }
+  document.getElementById('stroop-score').textContent = stroopState.score;
+  document.getElementById('stroop-errors').textContent = stroopState.errors;
+  newStroopWord();
+}
+
+document.getElementById('stroop-start').addEventListener('click', ()=>{
+  clearAllIntervals();
+  const stroopTime = parseInt(document.getElementById('stroop-difficulty').value);
+  stroopState = {score:0, errors:0, timeLeft:stroopTime, current:null, running:true, reactionTimes:[], startedAt:0};
+  document.getElementById('stroop-score').textContent=0;
+  document.getElementById('stroop-errors').textContent=0;
+  document.getElementById('stroop-time').textContent=stroopTime;
+  document.getElementById('stroop-summary').style.display='none';
+  document.getElementById('stroop-feedback').textContent='';
+  document.getElementById('stroop-start').textContent='Läuft…';
+  document.getElementById('stroop-start').disabled=true;
+  newStroopWord();
+  const interval = setInterval(()=>{
+    stroopState.timeLeft--;
+    document.getElementById('stroop-time').textContent = stroopState.timeLeft;
+    if(stroopState.timeLeft<=0){
+      clearInterval(interval);
+      stroopState.running=false;
+      document.getElementById('stroop-word').textContent='Fertig!';
+      document.getElementById('stroop-word').style.color='var(--text)';
+      document.getElementById('stroop-start').textContent='Nochmal';
+      document.getElementById('stroop-start').disabled=false;
+      const avgRt = stroopState.reactionTimes.length ? Math.round(stroopState.reactionTimes.reduce((a,b)=>a+b,0)/stroopState.reactionTimes.length) : 0;
+      const total = stroopState.score+stroopState.errors;
+      const acc = total ? Math.round(100*stroopState.score/total) : 0;
+      const sum = document.getElementById('stroop-summary');
+      sum.style.display='block';
+      sum.innerHTML = `Ergebnis: <strong>${stroopState.score} richtig</strong>, ${stroopState.errors} Fehler (${acc}% Genauigkeit). Durchschnittliche Reaktionszeit: <strong>${avgRt} ms</strong>.`;
+      pushHistory('stroop', stroopState.score, 'richtige Antworten', {errors: stroopState.errors, accuracy: acc, avgRt: avgRt});
+    }
+  },1000);
+  activeIntervals.push(interval);
+});
+
+// ================= MEMORY (Merkspanne) =================
+let memState = {level:3, best:0, sequence:[], userInput:[], phase:'idle'};
+
+function startMemoryRound(){
+  memState.sequence = Array.from({length:memState.level}, ()=>Math.floor(Math.random()*10));
+  memState.userInput = [];
+  memState.phase='showing';
+  document.getElementById('memory-numpad').style.display='none';
+  document.getElementById('memory-input-display').textContent='';
+  const display = document.getElementById('memory-display');
+  let i=0;
+  display.textContent = memState.sequence[0];
+  display.style.color='var(--accent)';
+  const showInterval = setInterval(()=>{
+    i++;
+    if(i < memState.sequence.length){
+      display.textContent = memState.sequence[i];
+    } else {
+      clearInterval(showInterval);
+      display.textContent = 'Jetzt eingeben';
+      display.style.color='var(--muted)';
+      display.style.fontSize='24px';
+      memState.phase='input';
+      document.getElementById('memory-numpad').style.display='grid';
+    }
+  }, 900);
+  activeIntervals.push(showInterval);
+}
+
+document.getElementById('memory-numpad').addEventListener('click', (e)=>{
+  if(memState.phase!=='input') return;
+  if(e.target.dataset.d !== undefined){
+    memState.userInput.push(parseInt(e.target.dataset.d));
+    document.getElementById('memory-input-display').textContent = memState.userInput.join(' ');
+  } else if(e.target.id==='memory-clear'){
+    memState.userInput=[];
+    document.getElementById('memory-input-display').textContent='';
+  } else if(e.target.id==='memory-submit'){
+    evaluateMemory();
+  }
+});
+
+function evaluateMemory(){
+  const correct = memState.userInput.length===memState.sequence.length &&
+    memState.userInput.every((d,idx)=>d===memState.sequence[idx]);
+  const display = document.getElementById('memory-display');
+  display.style.fontSize='64px';
+  if(correct){
+    memState.best = Math.max(memState.best, memState.level);
+    document.getElementById('memory-best').textContent = memState.best;
+    display.textContent='Richtig!';
+    display.style.color='var(--calm)';
+    memState.level++;
+    document.getElementById('memory-level').textContent = memState.level;
+    setTimeout(()=>{ if(memState.phase!=='idle') startMemoryRound(); }, 1000);
+  } else {
+    display.textContent='Leider falsch';
+    display.style.color='var(--danger)';
+    memState.phase='idle';
+    document.getElementById('memory-numpad').style.display='none';
+    const sum = document.getElementById('memory-summary');
+    sum.style.display='block';
+    sum.innerHTML = `Deine Merkspanne heute: <strong>${memState.best} Ziffern</strong>. Die durchschnittliche Merkspanne bei Erwachsenen liegt bei etwa 5–7 Ziffern.`;
+    if(memState.best > 0){ pushHistory('memory', memState.best, 'längste Merkspanne'); }
+    document.getElementById('memory-start').textContent='Nochmal';
+    document.getElementById('memory-start').disabled=false;
+  }
+}
+
+document.getElementById('memory-start').addEventListener('click', ()=>{
+  clearAllIntervals();
+  const startLevel = parseInt(document.getElementById('memory-difficulty').value);
+  memState = {level:startLevel, best:0, sequence:[], userInput:[], phase:'idle'};
+  document.getElementById('memory-level').textContent=startLevel;
+  document.getElementById('memory-best').textContent=0;
+  document.getElementById('memory-summary').style.display='none';
+  document.getElementById('memory-start').textContent='Läuft…';
+  document.getElementById('memory-start').disabled=true;
+  startMemoryRound();
+});
+
+// ================= VISUAL SEARCH =================
+const SEARCH_SYMBOLS = ['X','O','+','#','%','&','§','!'];
+let searchState = {found:0, total:0, target:'X', startTime:0, running:false};
+
+function buildSearchGrid(){
+  const grid = document.getElementById('search-grid');
+  grid.innerHTML='';
+  const target = SEARCH_SYMBOLS[Math.floor(Math.random()*SEARCH_SYMBOLS.length)];
+  searchState.target = target;
+  document.getElementById('search-target-preview').textContent = target;
+  const cellCount = parseInt(document.getElementById('search-difficulty').value);
+  const targetCount = Math.max(6, Math.round(cellCount*0.14)) + Math.floor(Math.random()*4);
+  const symbols = [];
+  for(let i=0;i<targetCount;i++) symbols.push(target);
+  while(symbols.length < cellCount){
+    const s = SEARCH_SYMBOLS[Math.floor(Math.random()*SEARCH_SYMBOLS.length)];
+    if(s!==target) symbols.push(s);
+  }
+  for(let i=symbols.length-1;i>0;i--){
+    const j = Math.floor(Math.random()*(i+1));
+    [symbols[i],symbols[j]]=[symbols[j],symbols[i]];
+  }
+  searchState.total = targetCount;
+  searchState.found = 0;
+  document.getElementById('search-total').textContent = targetCount;
+  document.getElementById('search-found').textContent = 0;
+  document.getElementById('search-time').textContent = '0.0';
+  document.getElementById('search-summary').style.display='none';
+
+  symbols.forEach(sym=>{
+    const cell = document.createElement('div');
+    cell.className='search-cell';
+    cell.textContent = sym;
+    cell.addEventListener('click', ()=>{
+      if(!searchState.running || cell.classList.contains('found')) return;
+      if(sym === target){
+        cell.classList.add('found');
+        searchState.found++;
+        document.getElementById('search-found').textContent = searchState.found;
+        if(searchState.found === searchState.total){
+          finishSearch();
+        }
+      } else {
+        cell.classList.add('wrong');
+        setTimeout(()=>cell.classList.remove('wrong'),300);
+      }
+    });
+    grid.appendChild(cell);
+  });
+}
+
+function finishSearch(){
+  searchState.running=false;
+  clearAllIntervals();
+  const elapsed = ((Date.now()-searchState.startTime)/1000).toFixed(1);
+  const sum = document.getElementById('search-summary');
+  sum.style.display='block';
+  sum.innerHTML = `Alle ${searchState.total} Symbole in <strong>${elapsed} Sekunden</strong> gefunden.`;
+  pushHistory('search', parseFloat(elapsed), 'Sekunden bis fertig', {total: searchState.total});
+}
+
+document.getElementById('search-start').addEventListener('click', ()=>{
+  clearAllIntervals();
+  buildSearchGrid();
+  searchState.running = true;
+  searchState.startTime = Date.now();
+  const interval = setInterval(()=>{
+    if(!searchState.running){ clearInterval(interval); return; }
+    document.getElementById('search-time').textContent = ((Date.now()-searchState.startTime)/1000).toFixed(1);
+  }, 100);
+  activeIntervals.push(interval);
+});
+
+// ================= MATH =================
+let mathState = {score:0, errors:0, timeLeft:45, running:false, currentAnswer:0};
+
+function newMathProblem(){
+  const difficulty = mathState.difficulty || 'medium';
+  let ops, a, b, answer, op;
+  if(difficulty === 'easy'){ ops = ['+','-']; }
+  else if(difficulty === 'hard'){ ops = ['+','-','×']; }
+  else { ops = ['+','-','×']; }
+  op = ops[Math.floor(Math.random()*ops.length)];
+  if(op==='+'){
+    if(difficulty==='easy'){ a=Math.floor(Math.random()*20)+5; b=Math.floor(Math.random()*20)+5; }
+    else if(difficulty==='hard'){ a=Math.floor(Math.random()*90)+20; b=Math.floor(Math.random()*90)+20; }
+    else { a=Math.floor(Math.random()*50)+10; b=Math.floor(Math.random()*50)+10; }
+    answer=a+b;
+  } else if(op==='-'){
+    if(difficulty==='easy'){ a=Math.floor(Math.random()*25)+10; b=Math.floor(Math.random()*a); }
+    else if(difficulty==='hard'){ a=Math.floor(Math.random()*100)+40; b=Math.floor(Math.random()*a); }
+    else { a=Math.floor(Math.random()*60)+20; b=Math.floor(Math.random()*a); }
+    answer=a-b;
+  } else {
+    if(difficulty==='hard'){ a=Math.floor(Math.random()*15)+5; b=Math.floor(Math.random()*15)+5; }
+    else { a=Math.floor(Math.random()*12)+2; b=Math.floor(Math.random()*12)+2; }
+    answer=a*b;
+  }
+  mathState.currentAnswer = answer;
+  document.getElementById('math-problem').textContent = `${a} ${op} ${b} = ?`;
+}
+
+function submitMathAnswer(){
+  if(!mathState.running) return;
+  const input = document.getElementById('math-answer');
+  const val = parseInt(input.value);
+  if(val === mathState.currentAnswer){
+    mathState.score++;
+  } else {
+    mathState.errors++;
+  }
+  document.getElementById('math-score').textContent = mathState.score;
+  document.getElementById('math-errors').textContent = mathState.errors;
+  input.value='';
+  newMathProblem();
+  input.focus();
+}
+
+document.getElementById('math-submit').addEventListener('click', submitMathAnswer);
+document.getElementById('math-answer').addEventListener('keydown', (e)=>{
+  if(e.key==='Enter') submitMathAnswer();
+});
+
+document.getElementById('math-start').addEventListener('click', ()=>{
+  clearAllIntervals();
+  const difficulty = document.getElementById('math-difficulty').value;
+  const mathTime = difficulty==='easy' ? 60 : difficulty==='hard' ? 30 : 45;
+  mathState = {score:0, errors:0, timeLeft:mathTime, running:true, currentAnswer:0, difficulty};
+  document.getElementById('math-score').textContent=0;
+  document.getElementById('math-errors').textContent=0;
+  document.getElementById('math-time').textContent=mathTime;
+  document.getElementById('math-summary').style.display='none';
+  document.getElementById('math-answer').disabled=false;
+  document.getElementById('math-submit').disabled=false;
+  document.getElementById('math-answer').value='';
+  document.getElementById('math-start').textContent='Läuft…';
+  document.getElementById('math-start').disabled=true;
+  newMathProblem();
+  document.getElementById('math-answer').focus();
+  const interval = setInterval(()=>{
+    mathState.timeLeft--;
+    document.getElementById('math-time').textContent = mathState.timeLeft;
+    if(mathState.timeLeft<=0){
+      clearInterval(interval);
+      mathState.running=false;
+      document.getElementById('math-problem').textContent='Fertig!';
+      document.getElementById('math-answer').disabled=true;
+      document.getElementById('math-submit').disabled=true;
+      document.getElementById('math-start').textContent='Nochmal';
+      document.getElementById('math-start').disabled=false;
+      const total = mathState.score+mathState.errors;
+      const acc = total ? Math.round(100*mathState.score/total) : 0;
+      const sum = document.getElementById('math-summary');
+      sum.style.display='block';
+      sum.innerHTML = `Ergebnis: <strong>${mathState.score} richtig</strong> von ${total} Aufgaben (${acc}% Genauigkeit).`;
+      pushHistory('math', mathState.score, 'richtige Aufgaben', {errors: mathState.errors, accuracy: acc});
+    }
+  },1000);
+  activeIntervals.push(interval);
+});
+
+// ================= N-BACK =================
+let nbackState = {n:2, seq:[], round:0, total:20, hits:0, misses:0, falseAlarms:0, responded:false, running:false, intervalRef:null};
+
+function generateNbackSequence(n, total){
+  const letters=['A','B','C','D','E','F','G','H'];
+  const seq=[];
+  for(let i=0;i<total;i++){
+    if(i>=n && Math.random()<0.35){
+      seq.push(seq[i-n]);
+    } else {
+      let letter;
+      let tries=0;
+      do{
+        letter = letters[Math.floor(Math.random()*letters.length)];
+        tries++;
+      } while(i>=n && letter===seq[i-n] && tries<10);
+      seq.push(letter);
+    }
+  }
+  return seq;
+}
+
+function showNbackRound(){
+  document.getElementById('nback-letter').textContent = nbackState.seq[nbackState.round];
+  document.getElementById('nback-round').textContent = (nbackState.round+1);
+}
+
+function updateNbackStats(){
+  document.getElementById('nback-hits').textContent = nbackState.hits;
+  document.getElementById('nback-misses').textContent = nbackState.misses;
+  document.getElementById('nback-false').textContent = nbackState.falseAlarms;
+  document.getElementById('nback-round').textContent = nbackState.round;
+}
+
+function advanceNbackRound(){
+  const i = nbackState.round;
+  const isMatch = i>=nbackState.n && nbackState.seq[i]===nbackState.seq[i-nbackState.n];
+  if(isMatch && !nbackState.responded){ nbackState.misses++; }
+  nbackState.round++;
+  updateNbackStats();
+  if(nbackState.round>=nbackState.total){
+    finishNback();
+    return;
+  }
+  nbackState.responded=false;
+  showNbackRound();
+}
+
+function finishNback(){
+  nbackState.running=false;
+  clearInterval(nbackState.intervalRef);
+  document.getElementById('nback-letter').textContent='Fertig!';
+  document.getElementById('nback-match').disabled=true;
+  document.getElementById('nback-start').textContent='Nochmal';
+  document.getElementById('nback-start').disabled=false;
+  const sum = document.getElementById('nback-summary');
+  sum.style.display='block';
+  sum.innerHTML = `Ergebnis bei ${nbackState.n}-Back: <strong>${nbackState.hits} Treffer</strong>, ${nbackState.misses} verpasst, ${nbackState.falseAlarms} Fehlalarme.`;
+  pushHistory('nback', nbackState.hits - nbackState.falseAlarms, 'Nettotreffer', {n: nbackState.n, hits: nbackState.hits, misses: nbackState.misses, falseAlarms: nbackState.falseAlarms});
+}
+
+document.getElementById('nback-match').addEventListener('click', ()=>{
+  if(!nbackState.running || nbackState.responded) return;
+  nbackState.responded=true;
+  const i = nbackState.round;
+  const isMatch = i>=nbackState.n && nbackState.seq[i]===nbackState.seq[i-nbackState.n];
+  if(isMatch){ nbackState.hits++; } else { nbackState.falseAlarms++; }
+  updateNbackStats();
+});
+
+document.getElementById('nback-start').addEventListener('click', ()=>{
+  clearAllIntervals();
+  const n = parseInt(document.getElementById('nback-difficulty').value);
+  const total = 20;
+  nbackState = {n, seq: generateNbackSequence(n, total), round:0, total, hits:0, misses:0, falseAlarms:0, responded:false, running:true, intervalRef:null};
+  updateNbackStats();
+  document.getElementById('nback-match').disabled=false;
+  document.getElementById('nback-start').textContent='Läuft…';
+  document.getElementById('nback-start').disabled=true;
+  document.getElementById('nback-summary').style.display='none';
+  showNbackRound();
+  const interval = setInterval(advanceNbackRound, 2200);
+  nbackState.intervalRef = interval;
+  activeIntervals.push(interval);
+});
+
+document.addEventListener('keydown', (e)=>{
+  if(e.code==='Space' && document.getElementById('panel-nback') && document.getElementById('panel-nback').classList.contains('active')){
+    e.preventDefault();
+    document.getElementById('nback-match').click();
+  }
+});
+
+// ================= SEQUENCE (Reihenfolge finden) =================
+let seqState = {total:12, next:1, startTime:0, running:false};
+
+function buildSeqGrid(){
+  const total = parseInt(document.getElementById('seq-difficulty').value);
+  const numbers = Array.from({length:total}, (_,i)=>i+1);
+  for(let i=numbers.length-1;i>0;i--){
+    const j = Math.floor(Math.random()*(i+1));
+    [numbers[i],numbers[j]]=[numbers[j],numbers[i]];
+  }
+  seqState = {total, next:1, startTime:0, running:false};
+  const grid = document.getElementById('seq-grid');
+  grid.innerHTML='';
+  numbers.forEach(num=>{
+    const item = document.createElement('div');
+    item.className='seq-item';
+    item.textContent = num;
+    item.dataset.num = num;
+    item.addEventListener('click', ()=>{
+      if(!seqState.running) return;
+      if(parseInt(item.dataset.num) === seqState.next){
+        item.classList.add('done');
+        seqState.next++;
+        document.getElementById('seq-next').textContent = seqState.next;
+        if(seqState.next > seqState.total){
+          finishSeq();
+        }
+      } else {
+        item.classList.add('wrong');
+        setTimeout(()=>item.classList.remove('wrong'), 300);
+      }
+    });
+    grid.appendChild(item);
+  });
+  document.getElementById('seq-next').textContent = 1;
+  document.getElementById('seq-time').textContent = '0.0';
+  document.getElementById('seq-summary').style.display='none';
+}
+
+function finishSeq(){
+  seqState.running=false;
+  clearAllIntervals();
+  const elapsed = ((Date.now()-seqState.startTime)/1000).toFixed(1);
+  const sum = document.getElementById('seq-summary');
+  sum.style.display='block';
+  sum.innerHTML = `Alle ${seqState.total} Zahlen in <strong>${elapsed} Sekunden</strong> sortiert.`;
+  pushHistory('sequence', parseFloat(elapsed), 'Sekunden bis fertig', {total: seqState.total});
+}
+
+document.getElementById('seq-start').addEventListener('click', ()=>{
+  clearAllIntervals();
+  buildSeqGrid();
+  seqState.running = true;
+  seqState.startTime = Date.now();
+  const interval = setInterval(()=>{
+    if(!seqState.running){ clearInterval(interval); return; }
+    document.getElementById('seq-time').textContent = ((Date.now()-seqState.startTime)/1000).toFixed(1);
+  }, 100);
+  activeIntervals.push(interval);
+});
+
+// ================= WORTFLÜSSIGKEIT =================
+let fluencyState = {words:[], timeLeft:60, running:false, prompt:null};
+
+function startFluency(){
+  clearAllIntervals();
+  const time = parseInt(document.getElementById('fluency-difficulty').value);
+  const letters = ['S','M','B','K','L','T','F','R','G','W'];
+  const categories = ['Tiere','Früchte und Gemüse','Berufe','Länder','Farben','Werkzeuge','Möbelstücke','Sportarten'];
+  let prompt;
+  if(Math.random()<0.5){
+    const letter = letters[Math.floor(Math.random()*letters.length)];
+    prompt = {label: `Wörter, die mit „${letter}“ beginnen`};
+  } else {
+    const cat = categories[Math.floor(Math.random()*categories.length)];
+    prompt = {label: `Wörter aus der Kategorie „${cat}“`};
+  }
+  fluencyState = {words:[], timeLeft:time, running:true, prompt};
+  document.getElementById('fluency-prompt').textContent = prompt.label;
+  document.getElementById('fluency-count').textContent = 0;
+  document.getElementById('fluency-time').textContent = time;
+  document.getElementById('fluency-list').innerHTML='';
+  document.getElementById('fluency-input').disabled=false;
+  document.getElementById('fluency-input').value='';
+  document.getElementById('fluency-input').focus();
+  document.getElementById('fluency-summary').style.display='none';
+  document.getElementById('fluency-start').textContent='Läuft…';
+  document.getElementById('fluency-start').disabled=true;
+  const interval = setInterval(()=>{
+    fluencyState.timeLeft--;
+    document.getElementById('fluency-time').textContent = fluencyState.timeLeft;
+    if(fluencyState.timeLeft<=0){
+      clearInterval(interval);
+      finishFluency();
+    }
+  }, 1000);
+  activeIntervals.push(interval);
+}
+
+function finishFluency(){
+  fluencyState.running=false;
+  document.getElementById('fluency-input').disabled=true;
+  document.getElementById('fluency-prompt').textContent='Fertig!';
+  document.getElementById('fluency-start').textContent='Nochmal';
+  document.getElementById('fluency-start').disabled=false;
+  const sum = document.getElementById('fluency-summary');
+  sum.style.display='block';
+  sum.innerHTML = `Du hast <strong>${fluencyState.words.length} Wörter</strong> zur Vorgabe „${fluencyState.prompt.label}“ gefunden.`;
+  pushHistory('fluency', fluencyState.words.length, 'Wörter gefunden', {prompt: fluencyState.prompt.label});
+}
+
+document.getElementById('fluency-input').addEventListener('keydown', (e)=>{
+  if(e.key==='Enter' && fluencyState.running){
+    const val = e.target.value.trim();
+    if(val && !fluencyState.words.includes(val.toLowerCase())){
+      fluencyState.words.push(val.toLowerCase());
+      document.getElementById('fluency-count').textContent = fluencyState.words.length;
+      const chip = document.createElement('span');
+      chip.className='word-chip';
+      chip.textContent = val;
+      document.getElementById('fluency-list').appendChild(chip);
+    }
+    e.target.value='';
+  }
+});
+
+document.getElementById('fluency-start').addEventListener('click', startFluency);
+
+// ================= REAKTIONSTEST =================
+let reactionState = {round:0, total:8, times:[], falseStarts:0, phase:'idle', timeoutRef:null, running:false, goTime:0};
+
+function reactionSetPhase(phase){
+  reactionState.phase = phase;
+  const box = document.getElementById('reaction-box');
+  box.classList.remove('waiting','go');
+  if(phase==='waiting'){ box.classList.add('waiting'); box.textContent='Warten…'; }
+  else if(phase==='go'){ box.classList.add('go'); box.textContent='JETZT!'; }
+  else { box.textContent='Bereit …'; }
+}
+
+function reactionNextRound(){
+  if(reactionState.round >= reactionState.total){ finishReaction(); return; }
+  reactionSetPhase('waiting');
+  const delay = 1000 + Math.random()*3000;
+  reactionState.timeoutRef = setTimeout(()=>{
+    reactionState.goTime = Date.now();
+    reactionSetPhase('go');
+  }, delay);
+}
+
+document.getElementById('reaction-box').addEventListener('click', ()=>{
+  if(!reactionState.running) return;
+  if(reactionState.phase==='waiting'){
+    clearTimeout(reactionState.timeoutRef);
+    reactionState.falseStarts++;
+    document.getElementById('reaction-false').textContent = reactionState.falseStarts;
+    reactionState.round++;
+    document.getElementById('reaction-round').textContent = reactionState.round;
+    document.getElementById('reaction-box').classList.remove('waiting','go');
+    document.getElementById('reaction-box').textContent = 'Zu früh!';
+    setTimeout(()=>{ if(reactionState.running) reactionNextRound(); }, 900);
+  } else if(reactionState.phase==='go'){
+    const rt = Date.now() - reactionState.goTime;
+    reactionState.times.push(rt);
+    reactionState.round++;
+    document.getElementById('reaction-round').textContent = reactionState.round;
+    const avg = Math.round(reactionState.times.reduce((a,b)=>a+b,0)/reactionState.times.length);
+    document.getElementById('reaction-avg').textContent = avg;
+    document.getElementById('reaction-box').classList.remove('waiting','go');
+    document.getElementById('reaction-box').textContent = rt + ' ms';
+    setTimeout(()=>{ if(reactionState.running) reactionNextRound(); }, 900);
+  }
+});
+
+function finishReaction(){
+  reactionState.running=false;
+  document.getElementById('reaction-start').textContent='Nochmal';
+  document.getElementById('reaction-start').disabled=false;
+  document.getElementById('reaction-box').classList.remove('waiting','go');
+  document.getElementById('reaction-box').textContent='Fertig!';
+  const avg = reactionState.times.length ? Math.round(reactionState.times.reduce((a,b)=>a+b,0)/reactionState.times.length) : 0;
+  const sum = document.getElementById('reaction-summary');
+  sum.style.display='block';
+  sum.innerHTML = `Durchschnittliche Reaktionszeit: <strong>${avg} ms</strong> über ${reactionState.times.length} gültige Runden (${reactionState.falseStarts} Fehlstarts).`;
+  if(avg > 0){ pushHistory('reaction', avg, 'ms Reaktionszeit (Ø)', {falseStarts: reactionState.falseStarts, rounds: reactionState.total}); }
+}
+
+document.getElementById('reaction-start').addEventListener('click', ()=>{
+  clearAllIntervals();
+  const total = parseInt(document.getElementById('reaction-difficulty').value);
+  reactionState = {round:0, total, times:[], falseStarts:0, phase:'idle', timeoutRef:null, running:true, goTime:0};
+  document.getElementById('reaction-round').textContent = 0;
+  document.getElementById('reaction-avg').textContent = '–';
+  document.getElementById('reaction-false').textContent = 0;
+  document.getElementById('reaction-summary').style.display='none';
+  document.getElementById('reaction-start').textContent='Läuft…';
+  document.getElementById('reaction-start').disabled=true;
+  reactionNextRound();
+});
+
+// ================= WORTGEDÄCHTNIS =================
+const WORD_POOL = ['Baum','Fenster','Wolke','Tasse','Berg','Fluss','Lampe','Straße','Apfel','Vogel',
+  'Schuh','Brief','Uhr','Blume','Tisch','Schlüssel','Wagen','Insel','Kerze','Spiegel',
+  'Wald','Brücke','Sonne','Mond','Stern','Karte','Buch','Feder','Glas','Ring'];
+
+let wordmemoryState = {words:[], recalled:[], phase:'idle', timeLeft:0, running:false};
+
+function startWordmemory(){
+  clearAllIntervals();
+  const count = parseInt(document.getElementById('wordmemory-difficulty').value);
+  const pool = [...WORD_POOL];
+  for(let i=pool.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [pool[i],pool[j]]=[pool[j],pool[i]]; }
+  const words = pool.slice(0, count);
+  wordmemoryState = {words, recalled:[], phase:'study', timeLeft: count + 8, running:true};
+  document.getElementById('wordmemory-phase-label').textContent='Einprägen';
+  document.getElementById('wordmemory-start').style.display='none';
+  document.getElementById('wordmemory-finish').style.display='none';
+  document.getElementById('wordmemory-recall-area').style.display='none';
+  document.getElementById('wordmemory-summary').style.display='none';
+  const studyArea = document.getElementById('wordmemory-study-area');
+  studyArea.innerHTML = words.map(w=>`<span class="word-chip" style="color:var(--accent);">${w}</span>`).join('');
+  document.getElementById('wordmemory-timer').textContent = wordmemoryState.timeLeft;
+  const interval = setInterval(()=>{
+    wordmemoryState.timeLeft--;
+    document.getElementById('wordmemory-timer').textContent = wordmemoryState.timeLeft;
+    if(wordmemoryState.timeLeft<=0){
+      clearInterval(interval);
+      startRecallPhase();
+    }
+  }, 1000);
+  activeIntervals.push(interval);
+}
+
+function startRecallPhase(){
+  wordmemoryState.phase='recall';
+  wordmemoryState.timeLeft = 60;
+  document.getElementById('wordmemory-phase-label').textContent='Abrufen';
+  document.getElementById('wordmemory-study-area').innerHTML='';
+  document.getElementById('wordmemory-recall-area').style.display='block';
+  const input = document.getElementById('wordmemory-input');
+  input.disabled=false;
+  input.value='';
+  input.focus();
+  document.getElementById('wordmemory-list').innerHTML='';
+  document.getElementById('wordmemory-finish').style.display='inline-block';
+  document.getElementById('wordmemory-timer').textContent = wordmemoryState.timeLeft;
+  const interval = setInterval(()=>{
+    wordmemoryState.timeLeft--;
+    document.getElementById('wordmemory-timer').textContent = wordmemoryState.timeLeft;
+    if(wordmemoryState.timeLeft<=0){
+      clearInterval(interval);
+      finishWordmemory();
+    }
+  }, 1000);
+  activeIntervals.push(interval);
+}
+
+document.getElementById('wordmemory-input').addEventListener('keydown', (e)=>{
+  if(e.key==='Enter' && wordmemoryState.phase==='recall'){
+    const val = e.target.value.trim();
+    if(val && !wordmemoryState.recalled.includes(val.toLowerCase())){
+      wordmemoryState.recalled.push(val.toLowerCase());
+      const chip = document.createElement('span');
+      chip.className='word-chip';
+      chip.textContent = val;
+      document.getElementById('wordmemory-list').appendChild(chip);
+    }
+    e.target.value='';
+  }
+});
+
+document.getElementById('wordmemory-finish').addEventListener('click', ()=>{
+  clearAllIntervals();
+  finishWordmemory();
+});
+
+function finishWordmemory(){
+  wordmemoryState.phase='done';
+  wordmemoryState.running=false;
+  document.getElementById('wordmemory-input').disabled=true;
+  document.getElementById('wordmemory-phase-label').textContent='Fertig';
+  document.getElementById('wordmemory-finish').style.display='none';
+  document.getElementById('wordmemory-start').style.display='inline-block';
+  document.getElementById('wordmemory-start').textContent='Nochmal';
+  document.getElementById('wordmemory-start').disabled=false;
+  const originalLower = wordmemoryState.words.map(w=>w.toLowerCase());
+  const correct = wordmemoryState.recalled.filter(w=>originalLower.includes(w));
+  const sum = document.getElementById('wordmemory-summary');
+  sum.style.display='block';
+  sum.innerHTML = `Du hast <strong>${correct.length} von ${wordmemoryState.words.length} Wörtern</strong> richtig erinnert.<br>Ursprüngliche Liste: ${wordmemoryState.words.join(', ')}.`;
+  pushHistory('wordmemory', correct.length, 'erinnerte Wörter', {total: wordmemoryState.words.length});
+}
+
+document.getElementById('wordmemory-start').addEventListener('click', startWordmemory);
+
+// ================= MUSTER MERKEN (Kachel-Sequenzgedächtnis) =================
+let tilesState = {gridSize:3, sequence:[], userIndex:0, level:0, running:false, phase:'idle', pendingTimeouts:[]};
+
+function buildTileGrid(n){
+  const grid = document.getElementById('tiles-grid');
+  grid.innerHTML='';
+  grid.style.gridTemplateColumns = `repeat(${n}, 1fr)`;
+  for(let i=0;i<n*n;i++){
+    const tile = document.createElement('div');
+    tile.className='tile';
+    tile.dataset.index = i;
+    tile.addEventListener('click', ()=>handleTileClick(i));
+    grid.appendChild(tile);
+  }
+}
+
+function playTilesSequence(){
+  tilesState.phase = 'showing';
+  let i = 0;
+  function step(){
+    if(i >= tilesState.sequence.length){
+      tilesState.phase = 'input';
+      return;
+    }
+    const idx = tilesState.sequence[i];
+    const el = document.querySelector(`#tiles-grid .tile[data-index="${idx}"]`);
+    if(el) el.classList.add('lit');
+    const t1 = setTimeout(()=>{
+      if(el) el.classList.remove('lit');
+      i++;
+      const t2 = setTimeout(step, 250);
+      tilesState.pendingTimeouts.push(t2);
+    }, 500);
+    tilesState.pendingTimeouts.push(t1);
+  }
+  step();
+}
+
+function nextTilesRound(){
+  tilesState.level++;
+  document.getElementById('tiles-level').textContent = tilesState.level;
+  const total = tilesState.gridSize * tilesState.gridSize;
+  tilesState.sequence.push(Math.floor(Math.random()*total));
+  tilesState.userIndex = 0;
+  playTilesSequence();
+}
+
+function handleTileClick(i){
+  if(!tilesState.running || tilesState.phase !== 'input') return;
+  const tileEl = document.querySelector(`#tiles-grid .tile[data-index="${i}"]`);
+  const expected = tilesState.sequence[tilesState.userIndex];
+  if(i === expected){
+    if(tileEl){
+      tileEl.classList.add('lit');
+      const t = setTimeout(()=>tileEl.classList.remove('lit'), 200);
+      tilesState.pendingTimeouts.push(t);
+    }
+    tilesState.userIndex++;
+    if(tilesState.userIndex >= tilesState.sequence.length){
+      tilesState.phase = 'idle';
+      const t = setTimeout(()=>{ if(tilesState.running) nextTilesRound(); }, 600);
+      tilesState.pendingTimeouts.push(t);
+    }
+  } else {
+    if(tileEl){
+      tileEl.classList.add('wrong');
+      setTimeout(()=>tileEl.classList.remove('wrong'), 300);
+    }
+    finishTiles();
+  }
+}
+
+function finishTiles(){
+  tilesState.running = false;
+  tilesState.phase = 'idle';
+  document.getElementById('tiles-start').textContent = 'Nochmal';
+  document.getElementById('tiles-start').disabled = false;
+  const achieved = Math.max(0, tilesState.level - 1);
+  const sum = document.getElementById('tiles-summary');
+  sum.style.display = 'block';
+  sum.innerHTML = `Du hast eine Sequenz von <strong>${achieved} Feldern</strong> korrekt wiederholt, bevor ein Fehler passiert ist.`;
+  if(achieved > 0){ pushHistory('tiles', achieved, 'längste Sequenz (Felder)', {gridSize: tilesState.gridSize}); }
+}
+
+document.getElementById('tiles-start').addEventListener('click', ()=>{
+  clearAllIntervals();
+  const gridSize = parseInt(document.getElementById('tiles-difficulty').value);
+  buildTileGrid(gridSize);
+  tilesState = {gridSize, sequence:[], userIndex:0, level:0, running:true, phase:'idle', pendingTimeouts:[]};
+  document.getElementById('tiles-level').textContent = 0;
+  document.getElementById('tiles-summary').style.display = 'none';
+  document.getElementById('tiles-start').textContent = 'Läuft…';
+  document.getElementById('tiles-start').disabled = true;
+  nextTilesRound();
+});
+
+// ================= VISUELLES GEDÄCHTNIS (gleichzeitig blinkende Kacheln) =================
+let visualMemState = {gridSize:4, level:0, lives:3, target:[], found:[], phase:'idle', running:false, pendingTimeouts:[]};
+
+function buildVisualMemGrid(n){
+  const grid = document.getElementById('visualmem-grid');
+  grid.innerHTML='';
+  grid.style.gridTemplateColumns = `repeat(${n}, 1fr)`;
+  for(let i=0;i<n*n;i++){
+    const tile = document.createElement('div');
+    tile.className='tile';
+    tile.dataset.index = i;
+    tile.addEventListener('click', ()=>handleVisualMemClick(i));
+    grid.appendChild(tile);
+  }
+}
+
+function updateVisualMemStats(){
+  document.getElementById('visualmem-level').textContent = visualMemState.level;
+  document.getElementById('visualmem-lives').textContent = visualMemState.lives;
+}
+
+function nextVisualMemLevel(){
+  visualMemState.level++;
+  const total = visualMemState.gridSize * visualMemState.gridSize;
+  const count = Math.min(total - 1, visualMemState.level + 2);
+  const indices = [];
+  while(indices.length < count){
+    const idx = Math.floor(Math.random()*total);
+    if(!indices.includes(idx)) indices.push(idx);
+  }
+  visualMemState.target = indices;
+  visualMemState.found = [];
+  visualMemState.phase = 'showing';
+  updateVisualMemStats();
+  indices.forEach(idx=>{
+    const el = document.querySelector(`#visualmem-grid .tile[data-index="${idx}"]`);
+    if(el) el.classList.add('lit');
+  });
+  const t = setTimeout(()=>{
+    indices.forEach(idx=>{
+      const el = document.querySelector(`#visualmem-grid .tile[data-index="${idx}"]`);
+      if(el) el.classList.remove('lit');
+    });
+    visualMemState.phase = 'input';
+  }, 1400 + count*120);
+  visualMemState.pendingTimeouts.push(t);
+}
+
+function handleVisualMemClick(i){
+  if(!visualMemState.running || visualMemState.phase !== 'input') return;
+  if(visualMemState.found.includes(i)) return;
+  const el = document.querySelector(`#visualmem-grid .tile[data-index="${i}"]`);
+  if(visualMemState.target.includes(i)){
+    visualMemState.found.push(i);
+    if(el) el.classList.add('correct');
+    if(visualMemState.found.length === visualMemState.target.length){
+      visualMemState.phase = 'idle';
+      const t = setTimeout(()=>{
+        document.querySelectorAll('#visualmem-grid .tile.correct').forEach(e=>e.classList.remove('correct'));
+        if(visualMemState.running) nextVisualMemLevel();
+      }, 500);
+      visualMemState.pendingTimeouts.push(t);
+    }
+  } else {
+    if(el){
+      el.classList.add('wrong');
+      const t = setTimeout(()=>el.classList.remove('wrong'), 300);
+      visualMemState.pendingTimeouts.push(t);
+    }
+    visualMemState.lives--;
+    updateVisualMemStats();
+    if(visualMemState.lives <= 0){
+      finishVisualMemory();
+    }
+  }
+}
+
+function finishVisualMemory(){
+  visualMemState.running = false;
+  visualMemState.phase = 'idle';
+  document.getElementById('visualmem-start').textContent = 'Nochmal';
+  document.getElementById('visualmem-start').disabled = false;
+  const achieved = Math.max(0, visualMemState.level - 1);
+  const sum = document.getElementById('visualmem-summary');
+  sum.style.display = 'block';
+  sum.innerHTML = `Du hast Level <strong>${achieved}</strong> erreicht, bevor alle Leben aufgebraucht waren.`;
+  if(achieved > 0){ pushHistory('visualmemory', achieved, 'höchstes Level', {gridSize: visualMemState.gridSize}); }
+}
+
+document.getElementById('visualmem-start').addEventListener('click', ()=>{
+  clearAllIntervals();
+  const gridSize = parseInt(document.getElementById('visualmem-difficulty').value);
+  buildVisualMemGrid(gridSize);
+  visualMemState = {gridSize, level:0, lives:3, target:[], found:[], phase:'idle', running:true, pendingTimeouts:[]};
+  document.getElementById('visualmem-summary').style.display = 'none';
+  document.getElementById('visualmem-start').textContent = 'Läuft…';
+  document.getElementById('visualmem-start').disabled = true;
+  updateVisualMemStats();
+  nextVisualMemLevel();
+});
+</script>
 </body>
 </html>
